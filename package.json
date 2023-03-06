@@ -1,0 +1,12 @@
+{
+  "dependencies": {
+    "@ethersproject/providers": "^5.7.2",
+    "@vechain/connex-driver": "^2.0.12",
+    "@vechain/connex-framework": "^2.0.12",
+    "@vechain/web3-providers-connex": "^1.0.0",
+    "express": "^4.18.2",
+    "express-json-rpc-router": "^1.4.0",
+    "rpc-websockets": "^7.5.1",
+    "thor-devkit": "^2.0.7"
+  }
+}
