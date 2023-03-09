@@ -1,8 +1,17 @@
 const { Framework }  = require('@vechain/connex-framework');
 const { Driver, SimpleNet, SimpleWallet } = require('@vechain/connex-driver');
-const { Provider } = require('@vechain/web3-providers-connex');
-const { Transaction, secp256k1, mnemonic} = require('thor-devkit');
+const { ProviderWeb3 } = require('@vechain/web3-providers-connex');
+const { HDNode, Transaction, secp256k1, mnemonic} = require('thor-devkit');
 
+
+function derivePrivateKeys(mnemonic, count)  {
+    const hdNode = HDNode.fromMnemonic(mnemonic.split(' '));
+    let hdNodes = [];
+    for (let i = 0; i < count; ++i) {
+        hdNodes.push(hdNode.derive(i));
+    }
+    return hdNodes.map(node => node.privateKey);
+}
 
 async function startProxy()
 {
@@ -11,123 +20,67 @@ async function startProxy()
     // Vechain Provider
     const net = new SimpleNet("http://127.0.0.1:8669")
     const wallet = new SimpleWallet()
+
+    // Import keys in wallet
+    const keys = derivePrivateKeys("denial kitchen pet squirrel other broom bar gas better priority spoil cross", 10);
+    keys.forEach(buffer => wallet.import(buffer.toString('hex')));
+
     const driver = await Driver.connect(net, wallet)
     const connexObj = new Framework(driver)
 
     // connexObj is an instance of Connex
-    const provider = new Provider({connex: connexObj, net: new SimpleNet("http://127.0.0.1:8669"), delegate: {url: "Hello", signer: "World"}})
+    const provider = new ProviderWeb3({connex: connexObj, wallet: wallet, net: net})
     
     // For handling get/post requests from Remix -> Thor
     const express = require('express');
    
     const jsonRouter = require('express-json-rpc-router')
     const app = express()
+    var cors = require('cors')
 
-    const controller = {
-        async eth_getBlockByHash(params){
-            const block = await provider.request({ 
-                method: 'eth_getBlockByHash', 
-                params: [params[0]] 
-            })
-            return block
-        },
-        async eth_getBlockByNumber({})
-        {
-
-        },
-        async eth_chainId({})
-        {
-
-        },
-        async eth_getTransactionByHash({})
-        {
-
-        },
-        async eth_getBalance({})
-        {
-
-        },
-        async eth_blockNumber({}) {
-            const block_number = await provider.request({ 
-                method: 'eth_blockNumber', 
-                params: [] 
-            })
-            return block_number
-        },
-        async eth_getCode({})
-        {
-
-        },
-        async eth_syncing({})
-        {
-
-        },
-        async eth_getTransactionReceipt({})
-        {
-
-        },
-        async eth_getStorageAt({}){
-
-        },
-        async eth_sendTransaction({})
-        {
-
-        },
-        async eth_call({})
-        {
-
-        },
-        async eth_estimateGas({})
-        {
-
-        },
-        async eth_getLogs({})
-        {
-
-        },
-        async eth_subscribe({})
-        {
-
-        },
-        async eth_unsubscribe({})
-        {
-
-        },
-        async eth_accounts({})
-        {
-
-        },
-        async net_version({})
-        {
-
-        },
-        // Not sure if we should include these
-        async eth_sendRawTransaction({})
-        {
-
-        },
-        async web3_clientVersion({})
-        {
-
-        },
-        async eth_gasPrice({})
-        {
-
-        },
-        async eth_getTransactionCount({})
-        {
-
-        }
-        
-    }
-
+    // Set the Keep-Alive timeout to 60 seconds
+    app.set('keepAliveTimeout', 60000);
+    app.use(cors())
     app.use(express.json())
-    app.use(jsonRouter({ methods: controller }))
+
+
+    app.post('*', async (req, res) => {
+        try {
+            res.json({
+               jsonrpc: 2.0,
+               result: await provider.request(req.body),
+               id: req.body.id
+            })
+        }
+        catch (e) {
+            res.json({
+               jsonrpc: 2.0,
+               error: e,
+               id: req.body.id
+            })
+          }
+      });
+
+    app.get('*', async (req, res) => {
+        try {
+            res.json({
+               jsonrpc: 2.0,
+               result: await provider.request(req.body),
+               id: req.body.id
+            })
+        }
+        catch (e) {
+            res.json({
+               jsonrpc: 2.0,
+               error: e,
+               id: req.body.id
+            })
+          }
+      });
+
     app.listen(8545, () => console.log('Example app listening on port 8545'))
 }
 
-
-// hello();
 startProxy();
 
 
