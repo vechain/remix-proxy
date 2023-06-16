@@ -1,4 +1,8 @@
 {
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "@ethersproject/providers": "^5.7.2",
     "@vechain/connex-driver": "^2.0.12",

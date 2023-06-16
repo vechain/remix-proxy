@@ -27,7 +27,7 @@ The following config will setup the proxy to work out of the box with Thor in so
 
 ## Run proxy
 ```bash
-node index.js
+npm start
 ```
 
 ## Connect with Remix
