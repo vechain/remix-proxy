@@ -4,6 +4,10 @@ const { ProviderWeb3 } = require('@vechain/web3-providers-connex');
 const { HDNode, Transaction, secp256k1, mnemonic} = require('thor-devkit');
 const fs = require('fs');
 
+BigInt.prototype['toJSON'] = function () {
+    return this.toLocaleString();
+};
+
 function derivePrivateKeys(mnemonic, count)  {
     const hdNode = HDNode.fromMnemonic(mnemonic.split(' '));
     let hdNodes = [];
@@ -55,6 +59,9 @@ async function startProxy(config)
             })
         }
         catch (e) {
+            console.log(`Error in post ${e}`);
+            console.log(`Error in post ${e.message}`);
+            console.log(`Error in post ${e.stack}`);
             res.json({
                jsonrpc: 2.0,
                error: e,
@@ -72,6 +79,7 @@ async function startProxy(config)
             })
         }
         catch (e) {
+            console.log(`Error in get ${e}`);
             res.json({
                jsonrpc: 2.0,
                error: e,
