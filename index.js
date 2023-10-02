@@ -4,6 +4,10 @@ const { ProviderWeb3 } = require('@vechain/web3-providers-connex');
 const { HDNode, Transaction, secp256k1, mnemonic} = require('thor-devkit');
 const fs = require('fs');
 
+BigInt.prototype['toJSON'] = function () {
+    return this.toLocaleString().replace(/"(-?\d+)n"/g, (_, a) => a);
+};
+
 function derivePrivateKeys(mnemonic, count)  {
     const hdNode = HDNode.fromMnemonic(mnemonic.split(' '));
     let hdNodes = [];
