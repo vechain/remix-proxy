@@ -4,10 +4,8 @@ const { ProviderWeb3 } = require('@vechain/web3-providers-connex');
 const { HDNode, Transaction, secp256k1, mnemonic} = require('thor-devkit');
 const fs = require('fs');
 
-const formatter = new Intl.NumberFormat('en-US', { useGrouping: false })
-
 BigInt.prototype['toJSON'] = function () {
-    return formatter.format(this);
+    return this.toLocaleString('en-US', { useGrouping: false });
 };
 
 function derivePrivateKeys(mnemonic, count)  {
